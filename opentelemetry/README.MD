@@ -24,59 +24,6 @@ OpenTelemetry Operator instalado no cluster
 
 O exemplo abaixo cria um Collector do tipo Gateway, que recebe dados via OTLP (gRPC e HTTP), processa com batch, e exporta usando um exporter loadbalancing, configurado para detectar automaticamente instâncias de Collectors usando DNS.
 
-📄 Arquivo: otel-gateway.yaml
-```
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel-gateway
-spec:
-  mode: deployment
-  replicas: 1
-
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: "0.0.0.0:4317"
-          http:
-            endpoint: "0.0.0.0:4318"
-
-    processors:
-      batch:
-
-    exporters:
-      debug: {}
-
-      loadbalancing:
-        protocol:
-          otlp:
-            tls:
-              insecure: true
-        resolver:
-          dns:
-            hostname: otel-metrics-collector-headless.opentelemetry-operator-system.svc.cluster.local
-            port: 4317
-
-    service:
-      pipelines:
-        metrics:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [loadbalancing]
-
-        logs:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: []
-
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: []
-```
-
 ### ▶️ Aplicando no cluster
 
 Execute:

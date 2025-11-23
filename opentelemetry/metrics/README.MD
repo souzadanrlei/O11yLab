@@ -30,59 +30,6 @@ Esta instância do Collector (otel-metrics):
 
 A pipeline configurada é apenas para métricas, sem traces ou logs (adaptável conforme necessidade, mas nesse caso usaremos apenas para métricas).
 
-#### 4. Estrutura do CRD OpenTelemetryCollector
-
-Aqui está a explicação das seções principais:
-```
-apiVersion: opentelemetry.io/v1beta1  
-kind: OpenTelemetryCollector  
-metadata:  
-  name: otel-metrics  
-spec:  
-  replicas: 1                    # Número de réplicas do Collector
-  mode: deployment               # Modo de deployment (pode ser daemonset, sidecar, statefulset) :contentReference[oaicite:2]{index=2}
-  config:                         # Configuração do próprio Collector
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: "0.0.0.0:4317"   # Porta para OTLP gRPC
-          http:
-            endpoint: "0.0.0.0:4318"   # Porta para OTLP HTTP
-
-       prometheus/internal:                            # Monitoramento do collector com o prometheus
-        config:
-          scrape_config:
-            - job_name: otel-collector-internal
-              static_config:
-                - targets: ["0.0.0.0:8888"]
-
-    processors: {}                # Nenhum processador adicional configurado
-
-    extensions:
-      basicauth/grafana_cloud:    # Extensão para autenticação BASIC
-        client_auth:
-          username: "$<user_token>"   # Substituir pelo seu ID de stack (usuário)
-          password: "$<token>"        # Substituir pelo API token
-
-    exporters:
-      debug: {}                    # Exportador de debug (útil para logs do Collector)
-      otlphttp/grafana_cloud:
-        endpoint: https://otlp-gateway-prod-eu-west-2.grafana.net/otlp  # Endpoint do Grafana Cloud
-        auth:
-          authenticator: basicauth/grafana_cloud
-        tls:
-          insecure: false
-          insecure_skip_verify: true   # Pode ser ajustado conforme necessidade
-
-    service:
-      extensions: [basicauth/grafana_cloud]   # Habilita a extensão no pipeline
-      pipelines:
-        metrics:
-          receivers: [otlp]
-          processors: []
-          exporters: [otlphttp/grafana_cloud, debug]  # Exporta para Grafana + debug
-```
 ### 5. Autenticação para Grafana Cloud
 
 username: deve ser o ID da stack do Grafana Cloud (um número ou string fornecida por Grafana).

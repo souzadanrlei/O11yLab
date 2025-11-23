@@ -1,0 +1,47 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-tracing
+spec:
+  replicas: 1
+  mode: deployment
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 20
+
+    extensions:
+      basicauth/grafana_cloud:
+        client_auth:
+          username: "$<user_token>"
+          password: "$<token>"
+
+    exporters:
+      debug: {}
+
+      otlphttp/grafana_cloud:
+        endpoint: https://otlp-gateway-prod-eu-west-2.grafana.net/otlp
+        auth:
+          authenticator: basicauth/grafana_cloud
+        tls:
+          insecure: false
+          insecure_skip_verify: true
+
+    service:
+      extensions: [basicauth/grafana_cloud]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/grafana_cloud, debug]
