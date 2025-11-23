@@ -20,7 +20,7 @@ spec:
 
     exporters:
       debug: {}
-      loadbalancing:
+      loadbalancing/metrics:
         protocol:
           otlp:
             tls:
@@ -35,7 +35,7 @@ spec:
         metrics:
           receivers: [otlp]
           processors: [batch]
-          exporters: [loadbalancing]
+          exporters: [loadbalancing/metrics, debug]
 
         logs:
           receivers: [otlp]
