@@ -1,116 +1,115 @@
-# 📘 OpenTelemetry Gateway Collector — Deployment Mode
+# 🌐 O11yLab
 
-Este documento descreve como criar um Gateway Collector utilizando o OpenTelemetry Operator em Deployment Mode.
-Esse modo é recomendado quando você precisa operar o Collector como uma aplicação independente, com controle de escalabilidade, versionamento e gerenciamento mais flexível.
+Laboratório de Observabilidade com OpenTelemetry e Ferramentas Open Source
 
+O O11yLab é um projeto colaborativo criado para servir como um laboratório unificado de observabilidade moderna, utilizando OpenTelemetry, Prometheus, Loki, Tempo, Grafana, além de ferramentas complementares para monitoramento, instrumentação, rastreamento distribuído e métricas em larga escala.
 
-### 🚀 Visão Geral
+Nosso objetivo é construir um ambiente educacional e experimental que facilite o aprendizado, a implementação e a comparação de tecnologias de observabilidade de mercado, seguindo boas práticas inspiradas em padrões da indústria e referências de documentação como o Google Cloud Documentation Style Guide.
 
-O Deployment Mode é ideal quando você deseja:
-Escalar horizontalmente o Collector
-Ter controle independente sobre a aplicação
-Realizar rollbacks de versão
-Parar / iniciar a instância do Collector de forma isolada
-Tratar o Collector como um componente autônomo da arquitetura
-Este modo é amplamente utilizado para criar um Gateway Collector, que atua como um ponto centralizador para ingestão de métricas, logs e traces antes de enviá-los para destinos externos ou para coletores do tipo agent.
+### 🎯 Objetivo do Projeto
 
-### 📦 Pré-requisitos
-Antes de começar, certifique-se de ter:
-Kubernetes 1.21+
-Helm instalado
-OpenTelemetry Operator instalado no cluster
+O projeto O11yLab foi criado para:
 
-### 🏗️ Criando o Gateway Collector (Deployment Mode)
+- Demonstrar arquiteturas reais de observabilidade modernas.
+- Oferecer um ambiente modular, extensível e fácil de replicar.
+- Mostrar na prática como usar o OpenTelemetry Collector, instrumentação automática, pipelines de métricas, logs e traces.
+- Integrar diversas ferramentas de monitoramento para fornecer um ambiente completo.
+- Servir como laboratório, material de estudo, referência técnica e repositório de experimentos.
+- Criar uma base sólida de conteúdo para documentação, tutoriais e vídeos educacionais.
 
-O exemplo abaixo cria um Collector do tipo Gateway, que recebe dados via OTLP (gRPC e HTTP), processa com batch, e exporta usando um exporter loadbalancing, configurado para detectar automaticamente instâncias de Collectors usando DNS.
+### 🏗️ Visão Técnica Inicial
 
-📄 Arquivo: otel-gateway.yaml
-```
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel-gateway
-spec:
-  mode: deployment
-  replicas: 1
+A primeira versão do O11yLab possui:
 
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: "0.0.0.0:4317"
-          http:
-            endpoint: "0.0.0.0:4318"
+📡 OpenTelemetry Operator — responsável por gerenciar coletores e instrumentações.
+🛰️ Gateway Collector — centraliza a entrada de métricas, logs e traces.
+📊 Métricas — coletadas via OTLP e distribuídas por um loadbalancer interno.
+📁 Logs — coletados e enviados para análise e indexação.
+🔍 Traces — suportando pipelines completos para rastreamento distribuído.
+🧩 Arquitetura modular — diretórios separados para cada pipeline (metrics, logs, traces).
 
-    processors:
-      batch:
+### 📦 Helm — templates, operadores e componentes instaláveis.
 
-    exporters:
-      debug: {}
+Conforme o laboratório evoluir, serão adicionados:
 
-      loadbalancing:
-        protocol:
-          otlp:
-            tls:
-              insecure: true
-        resolver:
-          dns:
-            hostname: otel-metrics-collector-headless.opentelemetry-operator-system.svc.cluster.local
-            port: 4317
+Grafana 
+VictoriaMetrics
+Prometheus
+Loki
+Tempo
+Blackbox Exporter
+k6 para testes
+Ferramentas []
+Dashboards e guias de instrumentação
 
-    service:
-      pipelines:
-        metrics:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [loadbalancing]
+### 📁 Estrutura do Repositório (versão inicial)
 
-        logs:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: []
+O11yLab/
+├── helm/
+│   └── README.md
+├── opentelemetry/
+│   ├── README.md
+│   ├── otel-gateway.yaml
+│   ├── metrics/
+│   │   └── otel-metrics.yaml
+│   ├── logs/
+│   │   └── otel-logs.yaml
+│   └── traces/
+│       └── otel-traces.yaml
+└── README.md  ← documentação principal
 
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: []
-```
+### 👥 Colaboradores e Responsabilidades
 
-### ▶️ Aplicando no cluster
+**[Danrlei Souza — Software Engineer Jr. / Project Collaborator](https://github.com/souzadanrlei)**
 
-Execute:
+Idealização do projeto O11yLab
+Suporte na estruturação do laboratório
+Configuração do OpenTelemetry Operator
+Integração com ferramentas externas
+Criação do Gateway Collector
+Documentação técnica e conteúdos educacionais
+Integrações (Grafana, Zabbix, Datadog, Rew Relic)
 
-```
-kubectl apply -f otel-gateway.yaml
-```
-Verifique o Deployment:
-```
-kubectl get pods -l app.kubernetes.io/name=otel-gateway
-```
+**[Ezequiel — Software Engineer  Sr. - Tech Lead / Project Collaborator](https://github.com/ezeqme)**
 
-### ⚙️ Explicação dos Componentes
-**Receivers**
-O Collector aceita dados via:
-- OTLP gRPC (porta 4317)
-- OTLP HTTP (porta 4318)
-**Processors**
-batch: otimiza processamento e envio dos dados.
+Idealização do projeto O11yLab
+Arquitetura de observabilidade
+Configuração dos ambientes
+Suporte na estruturação do laboratório
+Configuração do OpenTelemetry Operator
+Integração com ferramentas externas
+Contribuições técnicas em pipelines de logs, métricas e traces
 
-**Exporters**
-debug: útil para validação local
-loadbalancing: distribui traces/metrics para collectors agentes usando DNS
+Este projeto é colaborativo e aberto a contribuições futuras conforme novos módulos forem desenvolvidos.
 
-**Pipelines**
-São definidas três pipelines:
-| Pipeline | Receivers | Processors | Exporters     |
-| -------- | --------- | ---------- | ------------- |
-| Metrics  | otlp      | batch      | loadbalancing |
-| Logs     | otlp      | batch      | —             |
-| Traces   | otlp      | batch      | —             |
+### 📘 Padrões de Documentação
 
-### 📚 Documentação oficial
+Este projeto segue diretrizes inspiradas no Google Cloud Documentation Style Guide, priorizando:
 
-Para mais detalhes sobre o Deployment Mode:
-👉 [OpenTelemetry Helm Charts – Operator](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator)
-(Seção: [Deployment Mode](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#daemonset-mode))
+- Clareza
+- Concisão
+- Estrutura consistente
+- Exemplos práticos
+- Fluxos orientados a tarefas
+- Mantenabilidade e expansão futura
+
+### 🚀 Status do Projeto
+
+Fase atual:
+✔️ Setup inicial do OpenTelemetry
+✔️ Operator instalado
+✔️ Gateway Collector configurado
+✔️ Primeiros pipelines de métricas, logs e traces criados
+⬜ Documentação avançada
+⬜ Deploy de ferramentas adicionais
+⬜ Diagramas de arquitetura
+⬜ Scripts de automação
+⬜ CI/CD para validação YAML
+
+### 🤝 Como contribuir
+
+Em breve adicionaremos um CONTRIBUTING.md com:
+- Nomeação de branches
+- Padrões de commit
+- Estrutura para PRs
+- Boas práticas para novos módulos

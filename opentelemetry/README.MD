@@ -1,46 +1,31 @@
-📘 OpenTelemetry Gateway Collector — Deployment Mode
+# 📘 OpenTelemetry Gateway Collector — Deployment Mode
 
 Este documento descreve como criar um Gateway Collector utilizando o OpenTelemetry Operator em Deployment Mode.
 Esse modo é recomendado quando você precisa operar o Collector como uma aplicação independente, com controle de escalabilidade, versionamento e gerenciamento mais flexível.
 
-🚀 Visão Geral
+
+### 🚀 Visão Geral
 
 O Deployment Mode é ideal quando você deseja:
-
 Escalar horizontalmente o Collector
-
 Ter controle independente sobre a aplicação
-
 Realizar rollbacks de versão
-
 Parar / iniciar a instância do Collector de forma isolada
-
 Tratar o Collector como um componente autônomo da arquitetura
-
 Este modo é amplamente utilizado para criar um Gateway Collector, que atua como um ponto centralizador para ingestão de métricas, logs e traces antes de enviá-los para destinos externos ou para coletores do tipo agent.
 
-📦 Pré-requisitos
-
+### 📦 Pré-requisitos
 Antes de começar, certifique-se de ter:
-
 Kubernetes 1.21+
-
 Helm instalado
-
 OpenTelemetry Operator instalado no cluster
 
-Exemplo para instalar via Helm:
-
-helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
-helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
-  -n opentelemetry-operator-system \
-  --create-namespace
-
-🏗️ Criando o Gateway Collector (Deployment Mode)
+### 🏗️ Criando o Gateway Collector (Deployment Mode)
 
 O exemplo abaixo cria um Collector do tipo Gateway, que recebe dados via OTLP (gRPC e HTTP), processa com batch, e exporta usando um exporter loadbalancing, configurado para detectar automaticamente instâncias de Collectors usando DNS.
 
 📄 Arquivo: otel-gateway.yaml
+```
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
@@ -90,42 +75,42 @@ spec:
           receivers: [otlp]
           processors: [batch]
           exporters: []
+```
 
-▶️ Aplicando no cluster
+### ▶️ Aplicando no cluster
 
 Execute:
+
 ```
 kubectl apply -f otel-gateway.yaml
 ```
-
 Verifique o Deployment:
 ```
 kubectl get pods -l app.kubernetes.io/name=otel-gateway
 ```
-#### ⚙️ Explicação dos Componentes
-Receivers
 
+### ⚙️ Explicação dos Componentes
+**Receivers**
 O Collector aceita dados via:
-
-OTLP gRPC (porta 4317)
-OTLP HTTP (porta 4318)
-
-Processors
-
+- OTLP gRPC (porta 4317)
+- OTLP HTTP (porta 4318)
+**Processors**
 batch: otimiza processamento e envio dos dados.
 
-Exporters
-
+**Exporters**
 debug: útil para validação local
-
 loadbalancing: distribui traces/metrics para collectors agentes usando DNS
 
-Pipelines
-
+**Pipelines**
 São definidas três pipelines:
-```
-Pipeline	Receivers	Processors	Exporters
-Metrics	otlp	batch	loadbalancing
-Logs	otlp	batch	—
-Traces	otlp	batch	—
-```
+| Pipeline | Receivers | Processors | Exporters     |
+| -------- | --------- | ---------- | ------------- |
+| Metrics  | otlp      | batch      | loadbalancing |
+| Logs     | otlp      | batch      | —             |
+| Traces   | otlp      | batch      | —             |
+
+### 📚 Documentação oficial
+
+Para mais detalhes sobre o Deployment Mode:
+👉 [OpenTelemetry Helm Charts – Operator](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator)
+(Seção: [Deployment Mode](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#daemonset-mode))
