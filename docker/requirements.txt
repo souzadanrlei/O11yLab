@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+
+opentelemetry-distro
+opentelemetry-exporter-otlp
+
+#auto instrumentação
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-requests
+opentelemetry-instrumentation-logging
+opentelemetry-instrumentation-urllib

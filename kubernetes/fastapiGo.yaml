@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-go
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-go
+  template:
+    metadata:
+      labels:
+        app: fastapi-go
+    spec:
+      containers:
+      - name: fastapi-go
+        image: danrleisouza/fastapi-go-otel:1.0
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
+        env:
+          - name: OTEL_SERVICE_NAME
+            value: fastapi-go-service
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://otel-gateway-collector-headless.default.svc.cluster.local:4317
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-go
+  namespace: default
+spec:
+  selector:
+    app: fastapi-go
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
