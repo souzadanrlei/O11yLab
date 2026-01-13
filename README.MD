@@ -22,10 +22,15 @@ O projeto O11yLab foi criado para:
 A primeira versão do O11yLab possui:
 
 📡 OpenTelemetry Operator — responsável por gerenciar coletores e instrumentações.
+
 🛰️ Gateway Collector — centraliza a entrada de métricas, logs e traces.
+
 📊 Métricas — coletadas via OTLP e distribuídas por um loadbalancer interno.
+
 📁 Logs — coletados e enviados para análise e indexação.
+
 🔍 Traces — suportando pipelines completos para rastreamento distribuído.
+
 🧩 Arquitetura modular — diretórios separados para cada pipeline (metrics, logs, traces).
 
 ### 📦 Helm — templates, operadores e componentes instaláveis.
