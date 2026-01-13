@@ -44,8 +44,6 @@ Dashboards e guias de instrumentação
 
 ### 📁 Estrutura do Repositório (versão inicial)
 
-https://excalidraw.com/#json=O0f_dHXJLsMji9RZYvq4A,mBagFemhes9bWoz1K8Sw1g
-
 O11yLab/
 ├── helm/
 │   └── README.md
