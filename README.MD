@@ -44,6 +44,10 @@ Dashboards e guias de instrumentação
 
 ### 📁 Estrutura do Repositório (versão inicial)
 
+![arquitetura](src/img/
+2026-01-13_14-45.png)
+
+
 O11yLab/
 ├── helm/
 │   └── README.md
